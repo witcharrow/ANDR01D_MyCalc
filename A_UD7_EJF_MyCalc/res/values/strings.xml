@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">Mi Calculadora</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Aplicando operaciones de suma,resta,multipliación,división y Factorial &#8230;</string>
+    <string name="action_settings">EXIT</string>
+    <string name="hello_world">Pulse el botón para aplicar operaciones de suma,resta,multipliación,división y Factorial &#8230;</string>
+    <string name="service">CALCULADORA</string>    
 
 </resources>
