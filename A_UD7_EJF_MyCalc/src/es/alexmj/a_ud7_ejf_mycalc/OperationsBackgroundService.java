@@ -22,10 +22,15 @@ import android.util.Log;
 public class OperationsBackgroundService extends Service{
 
 	private static final String TAG = "OperationsBackgroundService--> ";
-	//##Binder given to clients
-	private OperationsBinder mOperationsBackgroundService = new OperationsBinder();
-	// Random number generator
-    private final Random mGenerator = new Random();
+	
+	private Random mGenerator;
+	private int num1;
+	private int num2;
+	private int suma;
+	private long resta;
+	private long multiplicacion;
+	private float division;
+	private double factorial;   
     
 	/**
 	 * Subclase para enlazar el servicio con la clase CalculartorActivity.
@@ -44,7 +49,65 @@ public class OperationsBackgroundService extends Service{
 			return OperationsBackgroundService.this;
 		}// getService()
 	}
+	//##Binder given to clients
+	private OperationsBinder mOperationsBackgroundService = new OperationsBinder();
+	
+	
+	/**
+	 * Thread que hace el trabajo en background
+	 */
+	private class CalculatorThread extends Thread{
 		
+		private boolean threadDone=false;
+
+		@Override
+		public void run() {
+			while (!threadDone){
+				num1 = getRandomNumber();
+			    num2 = getRandomNumber();		    
+			    
+			    suma = getSuma(num1,num2);		    
+			    resta = getResta(num1,num2);
+			    multiplicacion = getMultiplicacion(num1,num2);
+			    division = getDivision(num1,num2);
+			    factorial = getFactorial(num1);
+			    
+			    Log.i(TAG, "Numeros generados: " + num1+" y "+num2);
+			    Log.i(TAG, num1+"+"+num2+"="+suma);
+			    Log.i(TAG, num1+"-"+num2+"="+resta);		            
+			    Log.i(TAG, num1+"*"+num2+"="+multiplicacion);
+			    Log.i(TAG, num1+"/"+num2+"="+division);		    
+			    Log.i(TAG, num1+"!"+"="+factorial);  
+			    
+			    threadDone=true;
+			}  
+			stopSelf();
+		}
+	};
+	
+	private CalculatorThread mCalculatorThread;
+	
+	/**
+	 * Maneja las acciones a realizar por el servicio una vez lanzado, generando
+	 *  previamente un aleatorio.
+	 * @see android.app.Service#onStartCommand(android.content.Intent, int, int)
+	 */
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId){
+		Log.i(TAG, "onStartCommand - Service");
+		
+		//##Random number generator
+	    mGenerator = new Random();
+		
+		//##Thread que se encarga de las operaciones
+		mCalculatorThread = new CalculatorThread();
+		mCalculatorThread.start();
+		
+		//##El servicio no debe seguir funcionando una vez parado, por eso 
+		//	devolvemos START_NOT_STICKY
+		return START_NOT_STICKY;
+	}// onStartCommand()
+	
 	/**
 	 * Devuelve la referencia al servicio OperationsBackgroundService.
 	 * @see android.app.Service#onBind(android.content.Intent)
@@ -55,7 +118,16 @@ public class OperationsBackgroundService extends Service{
 		return mOperationsBackgroundService;
 	}// onBind()
 
-	
+	/**
+	 * Elimina el hilo en ejecucion.
+	 * @see android.app.Service#onDestroy()
+	 */
+	@Override
+	public void onDestroy() {
+		super.onDestroy();		
+		mCalculatorThread = null;
+	}
+
 	/**
 	 * Genera un numero aleatorio del 0 al 100.
 	 * @return numero aleatorio entre el 0 y el 100
